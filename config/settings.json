@@ -1,0 +1,16 @@
+{
+    "host": "https:\/\/api.seugenioapi.com.br\/api\/v1",
+    "id": "",
+    "api_key": "",
+    "timeout": 60,
+    "max_message_length": 4096,
+    "max_phone_length": 20,
+    "default_ddd": "44",
+    "default_number": "999999999",
+    "debug_mode": true,
+    "allowed_ips": [],
+    "api_secret_key": "",
+    "cors_enabled": true,
+    "cors_origins": [],
+    "updated_at": "2025-10-24 16:00:27"
+}
