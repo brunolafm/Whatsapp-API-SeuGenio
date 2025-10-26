@@ -2340,7 +2340,58 @@ function generateCorsOrigins(corsOriginsInput) {
 		return [];
 	}
 	
-	return corsOriginsInput.split(',').map(origin => origin.trim()).filter(origin => origin.length > 0);
+	if (corsOriginsInput.includes(',')) {
+		return corsOriginsInput.split(',').map(origin => origin.trim()).filter(origin => origin.length > 0);
+	}
+	
+	const domain = corsOriginsInput.trim();
+	if (!domain) return [];
+	
+	const variations = [];
+	
+	const domains = [domain];
+	if (!domain.startsWith('www.')) {
+		domains.push('www.' + domain);
+	} else {
+		domains.push(domain.replace('www.', ''));
+	}
+	
+	domains.forEach(d => {
+		variations.push('http://' + d);
+		variations.push('https://' + d);
+	});
+	
+	if (!domain.includes(':')) {
+		domains.forEach(d => {
+			variations.push('http://' + d + ':3000');
+			variations.push('https://' + d + ':3000');
+			variations.push('http://' + d + ':8080');
+			variations.push('https://' + d + ':8080');
+			variations.push('http://' + d + ':5000');
+			variations.push('https://' + d + ':5000');
+		});
+	}
+	
+	return [...new Set(variations)]; // Remove duplicatas
+}
+
+function showCorsPreview(domain) {
+	const preview = document.getElementById('corsPreview');
+	const variations = document.getElementById('corsVariations');
+	
+	if (!domain || domain.trim() === '') {
+		if (preview) preview.style.display = 'none';
+		return;
+	}
+	
+	const corsOrigins = generateCorsOrigins(domain);
+	
+	if (preview && variations) {
+		preview.style.display = 'block';
+		variations.innerHTML = corsOrigins.map(origin => 
+			`<div style="margin: 2px 0; padding: 2px 5px; background: #e9ecef; border-radius: 3px; font-family: monospace; font-size: 11px;">${origin}</div>`
+		).join('');
+	}
 }
 
 function showContactStatusModal(target, realNumber, statusResponse) {
@@ -2928,7 +2979,7 @@ async function saveConfig() {
 	const form = $('#configForm');
 	const corsOriginsInput = form.find('input[name="cors_origins"]').val();
 
-
+	// Gerar automaticamente as variações de CORS
 	const corsOrigins = generateCorsOrigins(corsOriginsInput);
 
 	const formData = {

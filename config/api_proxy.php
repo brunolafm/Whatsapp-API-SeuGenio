@@ -4,6 +4,25 @@ require_once __DIR__ . '/config.php';
 
 if (basename($_SERVER['PHP_SELF']) === 'api_proxy.php') {
     header('Content-Type: application/json; charset=utf-8');
+    
+    if (DEBUG_MODE) {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, POST, OPTIONS, PATCH');
+        header('Access-Control-Allow-Headers: Content-Type, Authorization');
+    } else {
+        if (CORS_ENABLED) {
+            $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+            if (in_array($origin, CORS_ORIGINS)) {
+                header("Access-Control-Allow-Origin: $origin");
+            }
+            header('Access-Control-Allow-Methods: GET, POST, OPTIONS, PATCH');
+            header('Access-Control-Allow-Headers: Content-Type, Authorization');
+        }
+    }
+
+    if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        exit(0);
+    }
 }
 
 if (basename($_SERVER['PHP_SELF']) === 'api_proxy.php' && isset($_SERVER['REQUEST_METHOD']) && !in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PATCH'])) {

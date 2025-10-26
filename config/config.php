@@ -56,6 +56,15 @@ function is_origin_allowed($origin = null) {
     }
     
     $origin = $origin ?: ($_SERVER['HTTP_ORIGIN'] ?? '');
+
+    if (empty($origin)) {
+        return true;
+    }
+
+    if (empty(CORS_ORIGINS)) {
+        return true;
+    }
+
     return in_array($origin, CORS_ORIGINS);
 }
 
@@ -173,24 +182,5 @@ if (DEBUG_MODE) {
     ini_set('display_errors', 0);
 }
 
-if (!isset($_SERVER['HTTP_ACCEPT']) || strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === false) {
-    if (DEBUG_MODE) {
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type, Authorization');
-    } else {
-        if (CORS_ENABLED) {
-            $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-            if (in_array($origin, CORS_ORIGINS)) {
-                header("Access-Control-Allow-Origin: $origin");
-            }
-            header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-            header('Access-Control-Allow-Headers: Content-Type, Authorization');
-        }
-    }
-
-    if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-        exit(0);
-    }
-}
+// CORS headers são definidos no api_proxy.php quando necessário
 ?>

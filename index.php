@@ -623,7 +623,7 @@ require_once __DIR__ . '/config/config.php';
                         </label>
                         <input type="text" id="configCorsOrigins" name="cors_origins" 
                                placeholder="seudominio.com ou localhost:3000" 
-                               value=""
+                               value="<?php echo defined('CORS_ORIGINS') ? implode(', ', CORS_ORIGINS) : ''; ?>"
                                oninput="showCorsPreview(this.value)">
                         <small class="text-muted">Digite o domínio (ex: seudominio.com) - será gerado automaticamente com todas as variações (www, http, https)</small>
                         <div id="corsPreview" class="cors-preview" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 12px; display: none;">
