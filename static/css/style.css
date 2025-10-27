@@ -160,24 +160,6 @@ body {
     border-left: 3px solid #007bff;
 }
 
-.status-connected {
-    background: rgba(72, 187, 120, 0.1);
-    color: var(--success-color);
-    border: 1px solid rgba(72, 187, 120, 0.2);
-}
-
-.status-disconnected {
-    background: rgba(245, 101, 101, 0.1);
-    color: var(--error-color);
-    border: 1px solid rgba(245, 101, 101, 0.2);
-}
-
-.status-connecting {
-    background: rgba(237, 137, 54, 0.1);
-    color: var(--warning-color);
-    border: 1px solid rgba(237, 137, 54, 0.2);
-}
-
 .main-content {
     display: grid;
     grid-template-columns: 1fr 1fr;

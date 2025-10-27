@@ -608,7 +608,7 @@ require_once __DIR__ . '/config/config.php';
                         <small class="text-muted">Debug ON: permite qualquer origem + exibe respostas. Debug OFF: aplica CORS + oculta respostas</small>
                     </div>
 
-                    <div class="form-group" id="corsSettings" <?php echo (defined('DEBUG_MODE') && DEBUG_MODE) ? '' : 'style="display: none;"'; ?>>
+                    <div class="form-group" id="corsSettings" <?php echo (defined('DEBUG_MODE') && DEBUG_MODE) ? 'style="display: none;"' : ''; ?>>
                         <label>
                             <input type="checkbox" id="configCors" name="cors_enabled" 
                                    <?php echo defined('CORS_ENABLED') && CORS_ENABLED ? 'checked' : ''; ?>

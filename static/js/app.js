@@ -1,5 +1,6 @@
 ﻿const CONFIG = {
-	apiEndpoint: 'config/api_proxy.php'
+	apiEndpoint: 'config/api_proxy.php',
+	debugMode: false
 };
 let messagesSent = 0;
 let isConnected = false;
@@ -23,14 +24,31 @@ async function loadInitialConfig() {
 
 async function loadSettingsFromFile() {
 	try {
+		if (CONFIG.debugMode) {
+			console.log('🔧 [DEBUG] Carregando configurações do settings.json');
+		}
+		
 		const response = await fetch('config/settings.json');
 		if (response.ok) {
 			const settings = await response.json();
 			CONFIG.timeout = parseInt(settings.timeout) * 1000;
 			CONFIG.maxMessageLength = parseInt(settings.max_message_length) || null;
 			CONFIG.maxPhoneLength = parseInt(settings.max_phone_length) || null;
+			CONFIG.debugMode = settings.debug_mode || false;
+			
+			if (CONFIG.debugMode) {
+				console.log('🔧 [DEBUG] Configurações carregadas:', {
+					timeout: CONFIG.timeout,
+					maxMessageLength: CONFIG.maxMessageLength,
+					maxPhoneLength: CONFIG.maxPhoneLength,
+					debugMode: CONFIG.debugMode
+				});
+			}
 		}
 	} catch (error) {
+		if (CONFIG.debugMode) {
+			console.error('🔧 [DEBUG] Erro ao carregar settings.json:', error);
+		}
 	}
 }
 
@@ -658,7 +676,6 @@ $(document).ready(async function () {
 	loadDefaultNumbers();
 	checkConnectionStatus();
 	updateInterfaceVisibility();
-	toggleCorsMode();
 	toggleDebugMode();
 });
 
@@ -911,11 +928,22 @@ function setupEventListeners() {
 	});
 }
 async function sendTextMessage() {
+	if (CONFIG.debugMode) {
+		console.log('🔧 [DEBUG] Iniciando envio de mensagem de texto');
+	}
 
 	const formData = {
 		target: $('#messageForm input[name="target"]').val().replace(/[^0-9]/g, ''),
 		message: $('#messageForm textarea[name="message"]').val()
 	};
+
+	if (CONFIG.debugMode) {
+		console.log('🔧 [DEBUG] Dados da mensagem:', {
+			target: formData.target,
+			messageLength: formData.message.length,
+			timestamp: new Date().toISOString()
+		});
+	}
 
 	if (!formData.target || !formData.message) {
 		showAlert('Campos Obrigatórios', 'Por favor, preencha o número e a mensagem.');
@@ -2363,7 +2391,7 @@ function generateCorsOrigins(corsOriginsInput) {
 		variations.push('https://' + d);
 	});
 	
-	return [...new Set(variations)]; // Remove duplicatas
+	return [...new Set(variations)];
 }
 
 function showContactStatusModal(target, realNumber, statusResponse) {
@@ -2557,6 +2585,15 @@ async function makePatchRequest(action, data = {}) {
 	isProcessingRequest = true;
 
 	try {
+		if (CONFIG.debugMode) {
+			console.log('🔧 [DEBUG] Enviando requisição:', {
+				url: CONFIG.apiEndpoint,
+				method: 'PATCH',
+				payload: payload,
+				timestamp: new Date().toISOString()
+			});
+		}
+
 		const response = await $.ajax({
 			url: CONFIG.apiEndpoint,
 			method: 'PATCH',
@@ -2566,18 +2603,43 @@ async function makePatchRequest(action, data = {}) {
 			dataType: 'text'
 		});
 
+		if (CONFIG.debugMode) {
+			console.log('🔧 [DEBUG] Resposta bruta da API:', {
+				response: response,
+				timestamp: new Date().toISOString()
+			});
+		}
+
 		if (!response || response.trim() === '') {
 			throw new Error('Resposta vazia do servidor');
 		}
 
 		try {
 			const parsedResponse = JSON.parse(response);
+			
+			if (CONFIG.debugMode) {
+				console.log('🔧 [DEBUG] Resposta parseada da API:', {
+					parsedResponse: parsedResponse,
+					timestamp: new Date().toISOString()
+				});
+			}
+			
 			return parsedResponse;
 		} catch (parseError) {
 			throw new Error('Erro interno do servidor: Resposta inválida da API: ' + parseError.message);
 		}
 
 	} catch (error) {
+		if (CONFIG.debugMode) {
+			console.error('🔧 [DEBUG] Erro na requisição:', {
+				error: error,
+				status: error.status,
+				responseText: error.responseText,
+				message: error.message,
+				timestamp: new Date().toISOString()
+			});
+		}
+
 		if (error.status === 404) {
 			throw new Error('Erro 404: ' + error.responseText);
 		} else if (error.status === 500) {
@@ -2604,6 +2666,16 @@ async function makeApiRequest(action, data = {}) {
 	isProcessingRequest = true;
 
 	try {
+		if (CONFIG.debugMode) {
+			console.log('🔧 [DEBUG] Enviando requisição API:', {
+				url: CONFIG.apiEndpoint,
+				method: 'POST',
+				action: action,
+				payload: payload,
+				timestamp: new Date().toISOString()
+			});
+		}
+
 		if (action === 'validate_number' || action === 'get_contact_avatar') {
 		const response = await $.ajax({
 			url: CONFIG.apiEndpoint,
@@ -2613,6 +2685,13 @@ async function makeApiRequest(action, data = {}) {
 				timeout: CONFIG.timeout,
 			dataType: 'text'
 		});
+
+		if (CONFIG.debugMode) {
+			console.log('🔧 [DEBUG] Resposta bruta da API:', {
+				response: response,
+				timestamp: new Date().toISOString()
+			});
+		}
 
 			if (!response || response === '' || (typeof response === 'string' && response.trim() === '')) {
 				return { success: true, message: 'Operação realizada com sucesso' };
@@ -2635,7 +2714,24 @@ async function makeApiRequest(action, data = {}) {
 			dataType: 'text'
 		};
 
+		if (CONFIG.debugMode) {
+			console.log('🔧 [DEBUG] Enviando requisição API (ajaxOptions):', {
+				url: CONFIG.apiEndpoint,
+				method: 'POST',
+				action: action,
+				payload: payload,
+				timestamp: new Date().toISOString()
+			});
+		}
+
 		const response = await $.ajax(ajaxOptions);
+
+		if (CONFIG.debugMode) {
+			console.log('🔧 [DEBUG] Resposta bruta da API (ajaxOptions):', {
+				response: response,
+				timestamp: new Date().toISOString()
+			});
+		}
 
 		if (!response || response === '' || (typeof response === 'string' && response.trim() === '')) {
 			return { success: true, message: 'Operação realizada com sucesso' };
@@ -2937,18 +3033,20 @@ function toggleDebugMode() {
 	const corsOrigins = $('#corsOrigins');
 	const corsCheckbox = $('#configCors');
 
+	CONFIG.debugMode = debugCheckbox.is(':checked');
+
 	if (debugCheckbox.is(':checked')) {
 		responseSection.show();
+		corsSettings.hide();
+		corsOrigins.hide();
+	} else {
+		responseSection.hide();
 		corsSettings.show();
 		if (corsCheckbox.is(':checked')) {
 			corsOrigins.show();
 		} else {
 			corsOrigins.hide();
 		}
-	} else {
-		responseSection.hide();
-		corsSettings.hide();
-		corsOrigins.hide(); 
 	}
 }
 
@@ -2982,7 +3080,21 @@ async function saveConfig() {
 	}
 
 	try {
+		if (CONFIG.debugMode) {
+			console.log('🔧 [DEBUG] Salvando configurações:', {
+				formData: formData,
+				timestamp: new Date().toISOString()
+			});
+		}
+
 		const response = await makeApiRequest('save_config', formData);
+
+		if (CONFIG.debugMode) {
+			console.log('🔧 [DEBUG] Resposta do salvamento:', {
+				response: response,
+				timestamp: new Date().toISOString()
+			});
+		}
 
 		if (response && response.success) {
 
