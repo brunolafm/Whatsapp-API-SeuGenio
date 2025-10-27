@@ -39,19 +39,21 @@ if (basename($_SERVER['PHP_SELF']) === 'api_proxy.php' && !seugenio_is_configure
     }
 }
 
-if (basename($_SERVER['PHP_SELF']) === 'api_proxy.php' && !is_ip_allowed()) {
+$input = json_decode(file_get_contents('php://input'), true);
+if (!$input) {
+    $input = $_POST;
+}
+$isConfigAction = $input && in_array($input['action'], ['get_config', 'save_config']);
+
+if (basename($_SERVER['PHP_SELF']) === 'api_proxy.php' && !$isConfigAction && !is_ip_allowed()) {
     json_error('Acesso negado para este IP', 403);
 }
 
-if (basename($_SERVER['PHP_SELF']) === 'api_proxy.php' && !is_origin_allowed()) {
+if (basename($_SERVER['PHP_SELF']) === 'api_proxy.php' && !$isConfigAction && !is_origin_allowed()) {
     json_error('Acesso negado para esta origem', 403);
 }
 
 if (basename($_SERVER['PHP_SELF']) === 'api_proxy.php') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    if (!$input) {
-        $input = $_POST;
-    }
 
     $input = sanitize_input($input);
 

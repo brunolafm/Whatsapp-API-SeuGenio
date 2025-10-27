@@ -608,10 +608,11 @@ require_once __DIR__ . '/config/config.php';
                         <small class="text-muted">Debug ON: permite qualquer origem + exibe respostas. Debug OFF: aplica CORS + oculta respostas</small>
                     </div>
 
-                    <div class="form-group" id="corsSettings" <?php echo (defined('DEBUG_MODE') && DEBUG_MODE) ? 'style="display: none;"' : ''; ?>>
+                    <div class="form-group" id="corsSettings" <?php echo (defined('DEBUG_MODE') && DEBUG_MODE) ? '' : 'style="display: none;"'; ?>>
                         <label>
                             <input type="checkbox" id="configCors" name="cors_enabled" 
-                                   <?php echo defined('CORS_ENABLED') && CORS_ENABLED ? 'checked' : ''; ?>>
+                                   <?php echo defined('CORS_ENABLED') && CORS_ENABLED ? 'checked' : ''; ?>
+                                   onchange="toggleCorsMode()">
                             <i class="fas fa-shield-alt"></i> Habilitar CORS
                         </label>
                         <small class="text-muted">Restringe acesso apenas às origens permitidas (só funciona com debug desabilitado)</small>
@@ -622,14 +623,9 @@ require_once __DIR__ . '/config/config.php';
                             <i class="fas fa-globe"></i> Origens Permitidas
                         </label>
                         <input type="text" id="configCorsOrigins" name="cors_origins" 
-                               placeholder="seudominio.com ou localhost:3000" 
-                               value="<?php echo defined('CORS_ORIGINS') ? implode(', ', CORS_ORIGINS) : ''; ?>"
-                               oninput="showCorsPreview(this.value)">
+                               placeholder="seudominio.com" 
+                               value="<?php echo defined('CORS_ORIGINS') ? implode(', ', CORS_ORIGINS) : ''; ?>">
                         <small class="text-muted">Digite o domínio (ex: seudominio.com) - será gerado automaticamente com todas as variações (www, http, https)</small>
-                        <div id="corsPreview" class="cors-preview" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 12px; display: none;">
-                            <strong>Variações que serão geradas:</strong>
-                            <div id="corsVariations"></div>
-                        </div>
                     </div>
                 </form>
             </div>

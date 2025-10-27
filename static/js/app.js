@@ -658,6 +658,8 @@ $(document).ready(async function () {
 	loadDefaultNumbers();
 	checkConnectionStatus();
 	updateInterfaceVisibility();
+	toggleCorsMode();
+	toggleDebugMode();
 });
 
 function initializeApp() {
@@ -2361,37 +2363,7 @@ function generateCorsOrigins(corsOriginsInput) {
 		variations.push('https://' + d);
 	});
 	
-	if (!domain.includes(':')) {
-		domains.forEach(d => {
-			variations.push('http://' + d + ':3000');
-			variations.push('https://' + d + ':3000');
-			variations.push('http://' + d + ':8080');
-			variations.push('https://' + d + ':8080');
-			variations.push('http://' + d + ':5000');
-			variations.push('https://' + d + ':5000');
-		});
-	}
-	
 	return [...new Set(variations)]; // Remove duplicatas
-}
-
-function showCorsPreview(domain) {
-	const preview = document.getElementById('corsPreview');
-	const variations = document.getElementById('corsVariations');
-	
-	if (!domain || domain.trim() === '') {
-		if (preview) preview.style.display = 'none';
-		return;
-	}
-	
-	const corsOrigins = generateCorsOrigins(domain);
-	
-	if (preview && variations) {
-		preview.style.display = 'block';
-		variations.innerHTML = corsOrigins.map(origin => 
-			`<div style="margin: 2px 0; padding: 2px 5px; background: #e9ecef; border-radius: 3px; font-family: monospace; font-size: 11px;">${origin}</div>`
-		).join('');
-	}
 }
 
 function showContactStatusModal(target, realNumber, statusResponse) {
@@ -2963,23 +2935,31 @@ function toggleDebugMode() {
 	const responseSection = $('#responseSection');
 	const corsSettings = $('#corsSettings');
 	const corsOrigins = $('#corsOrigins');
+	const corsCheckbox = $('#configCors');
 
 	if (debugCheckbox.is(':checked')) {
 		responseSection.show();
-		corsSettings.hide();
-		corsOrigins.hide();
+		corsSettings.show();
+		if (corsCheckbox.is(':checked')) {
+			corsOrigins.show();
+		} else {
+			corsOrigins.hide();
+		}
 	} else {
 		responseSection.hide();
-		corsSettings.show();
-		corsOrigins.show();
+		corsSettings.hide();
+		corsOrigins.hide(); 
 	}
+}
+
+function toggleCorsMode() {
+	toggleDebugMode();
 }
 
 async function saveConfig() {
 	const form = $('#configForm');
 	const corsOriginsInput = form.find('input[name="cors_origins"]').val();
 
-	// Gerar automaticamente as variações de CORS
 	const corsOrigins = generateCorsOrigins(corsOriginsInput);
 
 	const formData = {
